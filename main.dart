@@ -472,3 +472,4 @@ class HomeScreen extends StatelessWidget {
                 'AI Tools',
                 () => Navigator.push(context,
                     Material
+                                     

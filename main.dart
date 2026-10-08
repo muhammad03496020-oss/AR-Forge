@@ -34,7 +34,7 @@ class Clip {
   double end;
   double speed;
   bool rev;
-  int rot; // 0, 90, 180, 270
+  int rot;
   bool flipH;
   bool flipV;
 
@@ -222,7 +222,7 @@ class ARForgeApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         scaffoldBackgroundColor: AppColors.dark,
-        textTheme: GoogleFonts.poppinsTextTheme(), // Fixed line
+        fontFamily: GoogleFonts.poppins().fontFamily,
         colorScheme: const ColorScheme.dark(
           primary: AppColors.accent,
           surface: AppColors.dark,
@@ -347,31 +347,32 @@ class _MainShellState extends State<MainShell> {
                     color: Colors.white38, fontSize: 10, letterSpacing: 1)),
           ),
           Container(
-        height: 74,
-        decoration: const BoxDecoration(
-          color: AppColors.main,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _navItem(Icons.home_rounded, 'Home', 0),
-            _navItem(Icons.music_note_rounded, 'Audio', 1),
-            GestureDetector(
-              onTap: () => startNewProject(context),
-              child: Container(
-                width: 52,
-                height: 52,
-                decoration: const BoxDecoration(
-                    color: AppColors.accent, shape: BoxShape.circle),
-                child: const Icon(Icons.add, color: AppColors.main, size: 30),
-              ),
+            height: 74,
+            decoration: const BoxDecoration(
+              color: AppColors.main,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
             ),
-            _navItem(Icons.folder_rounded, 'Projects', 2),
-            _navItem(Icons.person_rounded, 'Profile', 3),
-          ],
-        ),
-      ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _navItem(Icons.home_rounded, 'Home', 0),
+                _navItem(Icons.music_note_rounded, 'Audio', 1),
+                GestureDetector(
+                  onTap: () => startNewProject(context),
+                  child: Container(
+                    width: 52,
+                    height: 52,
+                    decoration: const BoxDecoration(
+                        color: AppColors.accent, shape: BoxShape.circle),
+                    child:
+                        const Icon(Icons.add, color: AppColors.main, size: 30),
+                  ),
+                ),
+                _navItem(Icons.folder_rounded, 'Projects', 2),
+                _navItem(Icons.person_rounded, 'Profile', 3),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -465,190 +466,9 @@ class HomeScreen extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _quick(context, Icons.auto_awesome, 'AI Tools',
+            _quick(
+                context,
+                Icons.auto_awesome,
+                'AI Tools',
                 () => Navigator.push(context,
-                    MaterialPageRoute(builder: (_) => const AiToolsScreen()))),
-            _quick(context, Icons.grid_view_rounded, 'Templates',
-                () => soon(context, 'Templates')),
-            _quick(context, Icons.edit_note_rounded, 'AI Prompt',
-                () => Navigator.push(context,
-                    MaterialPageRoute(builder: (_) => const AiPromptScreen()))),
-            _quick(context, Icons.music_note_rounded, 'Audio',
-                () => soon(context, 'Audio')),
-          ],
-        ),
-        const SizedBox(height: 24),
-        const Text('Recent Projects',
-            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
-        const SizedBox(height: 10),
-        ValueListenableBuilder<List<Project>>(
-          valueListenable: projects,
-          builder: (context, list, _) {
-            if (list.isEmpty) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: 24),
-                child: Text(
-                    'Abhi koi project nahi. Upar "Create New Project" dabao.',
-                    style: TextStyle(color: Colors.white54)),
-              );
-            }
-            return Column(
-              children:
-                  list.take(3).map((p) => _projectTile(context, p)).toList(),
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _quick(
-      BuildContext context, IconData icon, String label, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-                color: AppColors.card, borderRadius: BorderRadius.circular(16)),
-            child: Icon(icon, color: AppColors.accent),
-          ),
-          const SizedBox(height: 6),
-          Text(label, style: const TextStyle(fontSize: 12)),
-        ],
-      ),
-    );
-  }
-}
-
-Widget _projectTile(BuildContext context, Project p) {
-  return ListTile(
-    contentPadding: EdgeInsets.zero,
-    onTap: () => openProject(context, p),
-    leading: Container(
-      width: 56,
-      height: 56,
-      decoration: BoxDecoration(
-          color: AppColors.card, borderRadius: BorderRadius.circular(12)),
-      child: const Icon(Icons.movie, color: Colors.white38),
-    ),
-    title: Text(p.name),
-    subtitle: Text('${timeAgo(p.created)} · ${p.state.clips.length} clips',
-        style: const TextStyle(color: Colors.white54, fontSize: 12)),
-    trailing: const Icon(Icons.chevron_right, color: Colors.white54),
-  );
-}
-
-// ---------- Audio tab ----------
-class AudioScreen extends StatelessWidget {
-  const AudioScreen({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.all(24),
-        child: Text('Audio library jald aa rahi hai (Phase 2)',
-            style: TextStyle(color: Colors.white54, fontSize: 16)),
-      ),
-    );
-  }
-}
-
-// ---------- Projects ----------
-class ProjectsScreen extends StatelessWidget {
-  const ProjectsScreen({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<Project>>(
-      valueListenable: projects,
-      builder: (context, list, _) {
-        return ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            const Text('Projects',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 12),
-            if (list.isEmpty)
-              const Padding(
-                padding: EdgeInsets.only(top: 24),
-                child: Text('Abhi koi project nahi.',
-                    style: TextStyle(color: Colors.white54)),
-              ),
-            ...list.map((p) => Dismissible(
-                  key: ValueKey(p.created.toIso8601String()),
-                  direction: DismissDirection.endToStart,
-                  background: Container(
-                    color: Colors.red.shade700,
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.only(right: 20),
-                    child: const Icon(Icons.delete),
-                  ),
-                  onDismissed: (_) {
-                    projects.value =
-                        projects.value.where((x) => x != p).toList();
-                  },
-                  child: _projectTile(context, p),
-                )),
-            if (list.isNotEmpty)
-              const Padding(
-                padding: EdgeInsets.only(top: 12),
-                child: Text('Delete karne ke liye project ko left swipe karo',
-                    style: TextStyle(color: Colors.white38, fontSize: 12)),
-              ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-// ---------- Profile ----------
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
-  @override
-  Widget build(BuildContext context) {
-    final items = [
-      (Icons.workspace_premium, 'Subscription', 'Free Plan'),
-      (Icons.storage, 'Storage', ''),
-      (Icons.language, 'Language', 'English'),
-      (Icons.settings, 'Export Settings', ''),
-      (Icons.notifications, 'Notifications', ''),
-      (Icons.help_outline, 'Help & Support', ''),
-      (Icons.privacy_tip_outlined, 'Privacy', ''),
-    ];
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        const Text('Profile & Settings',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
-        const SizedBox(height: 16),
-        const ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: CircleAvatar(
-              radius: 26,
-              backgroundColor: AppColors.card,
-              child: Icon(Icons.person, color: AppColors.accent)),
-          title: Text('Muhammad Ali'),
-        ),
-        const Divider(),
-        ...items.map((e) => ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Icon(e.$1, color: AppColors.accent),
-              title: Text(e.$2),
-              trailing: e.$3.isEmpty
-                  ? const Icon(Icons.chevron_right, color: Colors.white54)
-                  : Text(e.$3, style: const TextStyle(color: Colors.white54)),
-              onTap: () => soon(context, e.$2),
-            )),
-      ],
-    );
-  }
-}
-
-// ---------- AI Tools ----------
-class AiToolsScreen extends StatelessWidget {
-  const AiToolsScreen({super.key});
-  @override
-  W
+                    Material

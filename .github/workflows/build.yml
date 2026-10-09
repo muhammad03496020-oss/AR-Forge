@@ -37,7 +37,7 @@ jobs:
       - name: Add logo
         run: |
           mkdir -p app/assets
-          cp logo.png app/assets/logo.png
+          cp "AR FORGE LOGO.PNG" app/assets/logo.png
           sed -i 's/^flutter:$/flutter:\n  assets:\n    - assets\/logo.png/' app/pubspec.yaml
           printf 'flutter_launcher_icons:\n  android: true\n  ios: false\n  image_path: "assets/logo.png"\n' > app/flutter_launcher_icons.yaml
 

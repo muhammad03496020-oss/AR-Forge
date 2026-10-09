@@ -26,7 +26,7 @@ jobs:
       - name: Add packages
         working-directory: app
         run: |
-          flutter pub add image_picker video_player ffmpeg_kit_flutter_new gal google_fonts
+          flutter pub add image_picker video_player ffmpeg_kit_flutter_new gal
           flutter pub add dev:flutter_launcher_icons
 
       - name: Set minSdk 24

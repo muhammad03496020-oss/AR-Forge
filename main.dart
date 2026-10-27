@@ -12,7 +12,6 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:gal/gal.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:record/record.dart';
@@ -1032,19 +1031,7 @@ class _GalleryPickerState extends State<GalleryPicker> {
 
   Future<void> _systemPick() async {
     if (widget.kind == PickKind.audio) {
-      final res = await FilePicker.pickFiles(type: FileType.audio);
-      final f = res?.files.single;
-      if (f == null || f.path == null) return;
-      if (mounted) {
-        Navigator.pop(context, [
-          PickedMedia(
-              path: f.path!,
-              isImage: false,
-              isAudio: true,
-              name: f.name,
-              dur: 0)
-        ]);
-      }
+      toast(context, 'Allow music access in Settings, then try again.');
       return;
     }
     final files = await ImagePicker().pickMultipleMedia();
@@ -1149,7 +1136,7 @@ class _GalleryPickerState extends State<GalleryPicker> {
                         OutlinedButton(
                           onPressed: _systemPick,
                           child: Text(widget.kind == PickKind.audio
-                              ? 'Pick music from phone files'
+                              ? 'Open Settings to allow music'
                               : "Use phone's picker"),
                         ),
                       ],
@@ -1166,7 +1153,7 @@ class _GalleryPickerState extends State<GalleryPicker> {
                           OutlinedButton(
                             onPressed: _systemPick,
                             child: Text(isAudio
-                                ? 'Pick music from phone files'
+                                ? 'Open Settings to allow music'
                                 : "Use phone's picker"),
                           ),
                         ],

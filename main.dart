@@ -1032,7 +1032,7 @@ class _GalleryPickerState extends State<GalleryPicker> {
 
   Future<void> _systemPick() async {
     if (widget.kind == PickKind.audio) {
-      final res = await FilePicker.platform.pickFiles(type: FileType.audio);
+      final res = await FilePicker.pickFiles(type: FileType.audio);
       final f = res?.files.single;
       if (f == null || f.path == null) return;
       if (mounted) {

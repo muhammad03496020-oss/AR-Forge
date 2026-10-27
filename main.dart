@@ -11,6 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:gal/gal.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:record/record.dart';
@@ -984,30 +986,81 @@ class _GalleryPickerState extends State<GalleryPicker> {
   }
 
   Future<void> _load() async {
-    final ps = await PhotoManager.requestPermissionExtend();
-    if (!ps.hasAccess) {
+    setState(() {
+      loading = true;
+      denied = false;
+    });
+    try {
+      final ps = await PhotoManager.requestPermissionExtend()
+          .timeout(const Duration(seconds: 15));
+      if (!ps.hasAccess) {
+        if (mounted) {
+          setState(() {
+            denied = true;
+            loading = false;
+          });
+        }
+        return;
+      }
+      final type =
+          widget.kind == PickKind.audio ? RequestType.audio : RequestType.common;
+      final paths = await PhotoManager.getAssetPathList(
+              onlyAll: true, type: type)
+          .timeout(const Duration(seconds: 15));
+      List<AssetEntity> list = [];
+      if (paths.isNotEmpty) {
+        list = await paths.first
+            .getAssetListPaged(page: 0, size: 800)
+            .timeout(const Duration(seconds: 15));
+      }
+      if (mounted) {
+        setState(() {
+          assets = list;
+          loading = false;
+          denied = false;
+        });
+      }
+    } catch (_) {
       if (mounted) {
         setState(() {
           denied = true;
           loading = false;
         });
       }
+    }
+  }
+
+  Future<void> _systemPick() async {
+    if (widget.kind == PickKind.audio) {
+      final res = await FilePicker.platform.pickFiles(type: FileType.audio);
+      final f = res?.files.single;
+      if (f == null || f.path == null) return;
+      if (mounted) {
+        Navigator.pop(context, [
+          PickedMedia(
+              path: f.path!,
+              isImage: false,
+              isAudio: true,
+              name: f.name,
+              dur: 0)
+        ]);
+      }
       return;
     }
-    final type =
-        widget.kind == PickKind.audio ? RequestType.audio : RequestType.common;
-    final paths = await PhotoManager.getAssetPathList(onlyAll: true, type: type);
-    List<AssetEntity> list = [];
-    if (paths.isNotEmpty) {
-      list = await paths.first.getAssetListPaged(page: 0, size: 800);
+    final files = await ImagePicker().pickMultipleMedia();
+    final out = <PickedMedia>[];
+    for (final f in files) {
+      final l = f.path.toLowerCase();
+      final img = ['.jpg', '.jpeg', '.png', '.webp', '.heic', '.gif', '.bmp']
+          .any((e) => l.endsWith(e));
+      out.add(PickedMedia(
+          path: f.path,
+          isImage: img,
+          isAudio: false,
+          name: f.name,
+          dur: 0));
     }
-    if (mounted) {
-      setState(() {
-        assets = list;
-        loading = false;
-        denied = false;
-      });
-    }
+    if (mounted) Navigator.pop(context, out);
   }
 
   void _tap(AssetEntity a) {
@@ -1092,12 +1145,33 @@ class _GalleryPickerState extends State<GalleryPicker> {
                         ),
                         TextButton(
                             onPressed: _load, child: const Text('Try again')),
+                        const SizedBox(height: 8),
+                        OutlinedButton(
+                          onPressed: _systemPick,
+                          child: Text(widget.kind == PickKind.audio
+                              ? 'Pick music from phone files'
+                              : "Use phone's picker"),
+                        ),
                       ],
                     ),
                   ),
                 )
               : assets.isEmpty
-                  ? const Center(child: Text('Nothing found on this phone'))
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('Nothing found on this phone'),
+                          const SizedBox(height: 12),
+                          OutlinedButton(
+                            onPressed: _systemPick,
+                            child: Text(isAudio
+                                ? 'Pick music from phone files'
+                                : "Use phone's picker"),
+                          ),
+                        ],
+                      ),
+                    )
                   : isAudio
                       ? ListView.builder(
                           itemCount: assets.length,

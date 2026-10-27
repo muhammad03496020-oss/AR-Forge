@@ -31,6 +31,14 @@ class AppColors {
   static const card = Color(0xFF354A34);
 }
 
+const Map<String, List<int>> ratios = {
+  '9:16': [9, 16],
+  '16:9': [16, 9],
+  '1:1': [1, 1],
+  '4:5': [4, 5],
+  '4:3': [4, 3],
+};
+
 // =====================================================
 // BASIC HELPERS
 // =====================================================
@@ -419,6 +427,7 @@ class AudioItem {
 }
 
 class EditState {
+  EditState();
   List<Clip> clips = [];
   List<OverlayItem> overlays = [];
   List<AudioItem> audios = [];
